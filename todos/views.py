@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from rest_framework import filters
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 from django.shortcuts import get_object_or_404
 
@@ -13,8 +16,11 @@ from .models import *
 
 
 class TaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        tasks      = Task.objects.all()
+        tasks      = Task.objects.filter(user=request.user)
         serializer = TaskSerializer(tasks, many=True)
 
         return Response(serializer.data)
@@ -23,20 +29,23 @@ class TaskView(APIView):
         serializer = TaskSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TaskDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request, pk):
-        task       = get_object_or_404(Task, pk=pk)
+        task       = get_object_or_404(Task, pk=pk, user=request.user)
         serializer = TaskSerializer(task)
 
         return Response(serializer.data)
 
     def patch(self, request, pk):
-        task       = get_object_or_404(Task, pk=pk)
+        task       = get_object_or_404(Task, pk=pk, user=request.user)
         serializer = TaskSerializer(task, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -45,7 +54,7 @@ class TaskDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
-        task       = get_object_or_404(Task, pk=pk)
+        task       = get_object_or_404(Task, pk=pk, user=request.user)
         serializer = TaskSerializer(task, data=request.data)
 
         if serializer.is_valid():
@@ -54,23 +63,30 @@ class TaskDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        task = get_object_or_404(Task, pk=pk)
+        task = get_object_or_404(Task, pk=pk, user=request.user)
         task.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TaskListView(generics.ListCreateAPIView):
-    queryset         = Task.objects.all()
-    serializer_class = TaskSerializer  
+    serializer_class = TaskSerializer
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'description']
 
+    def get_queryset(self):
+        return Task.objects.filter(user=self.request.user)
 
 class TaskFilterView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        tasks     = Task.objects.all()
+        tasks     = Task.objects.filter(user=request.user)
         completed = request.query_params.get('completed')
 
         if completed == 'true':
@@ -88,8 +104,11 @@ class TaskFilterView(APIView):
 
 
 class TaskOrderingView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        tasks = Task.objects.all()
+        tasks = Task.objects.filter(user=request.user)
         ordering = request.query_params.get('ordering')
 
         allowed_orderings = ['created_at', '-created_at', 'due_date', '-due_date']
