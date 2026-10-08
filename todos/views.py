@@ -66,3 +66,25 @@ class TaskListView(generics.ListCreateAPIView):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'description']
+
+
+class TaskFilterView(APIView):
+    def get(self, request):
+        tasks     = Task.objects.all()
+        completed = request.query_params.get('completed')
+
+        if completed == 'true':
+            tasks = tasks.filter(completed=True)
+
+        elif completed == 'false':
+            tasks = tasks.filter(completed=False)
+        
+        elif completed is not None:
+            return Response({"error": "Invalid value for 'completed' parameter. Use 'true' or 'false'."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serilizer = TaskSerializer(tasks, many=True)
+
+        return Response(serilizer.data)
+        
+            
+
