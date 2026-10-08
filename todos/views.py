@@ -82,9 +82,28 @@ class TaskFilterView(APIView):
         elif completed is not None:
             return Response({"error": "Invalid value for 'completed' parameter. Use 'true' or 'false'."}, status=status.HTTP_400_BAD_REQUEST)
         
-        serilizer = TaskSerializer(tasks, many=True)
+        serializer = TaskSerializer(tasks, many=True)
 
-        return Response(serilizer.data)
-        
+        return Response(serializer.data)
+
+
+class TaskOrderingView(APIView):
+    def get(self, request):
+        tasks = Task.objects.all()
+        ordering = request.query_params.get('ordering')
+
+        allowed_orderings = ['created_at', '-created_at', 'due_date', '-due_date']
+
+        if ordering is not None:
+            if ordering not in allowed_orderings:
+                return Response({"error": "Invalid value for 'ordering' parameter. Use 'created_at', '-created_at', 'due_date', or '-due_date'."}, status=status.HTTP_400_BAD_REQUEST)
             
+            tasks = tasks.order_by(ordering)
+        
+        serializer = TaskSerializer(tasks, many=True)
+        
+        return Response(serializer.data)
+
+
+
 

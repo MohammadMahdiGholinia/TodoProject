@@ -5,5 +5,7 @@ urlpatterns = [
     path("tasks/", views.TaskView.as_view(), name="taskspy"),
     path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"),
     path("task-list/", views.TaskListView.as_view(), name="task-list"), 
-    path("task-filter/", views.TaskFilterView.as_view(), name="task-filter")
+    path("task-filter/", views.TaskFilterView.as_view(), name="task-filter"),
+    path("task-ordering/", views.TaskOrderingView.as_view(), name="task-ordering"),
 ]
+
