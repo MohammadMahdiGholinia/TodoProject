@@ -33,23 +33,33 @@ Activate the virtual environment.
 
 **Windows PowerShell:**
 
-`.\venv\Scripts\Activate.ps1`
+```bash
+.\venv\Scripts\Activate.ps1
+```
 
 **Windows CMD:**
 
-`venv\Scripts\activate`
+```bash
+venv\Scripts\activate
+```
 
 ### 3. Install dependencies
 
-`pip install -r requirements.txt`
+```bash
+pip install -r requirements.txt
+```
 
 ### 4. Apply migrations
 
-`python manage.py migrate`
+```bash
+python manage.py migrate
+```
 
 ### 5. Start the development server
 
-`python manage.py runserver`
+```bash
+python manage.py runserver
+```
 
 The API will be available at:
 
